@@ -1,0 +1,14 @@
+INT Dog 123
+INT Cat 123
+Begin
+INT Cat 123
+Moose = 9:
+Read [ Cat ]:
+IFF [ Cat = Mouse-3*78 ] 
+    Begin
+    INT Animals 999
+    Loop [ Bear => [Lion+Sabertooth] ]
+    Output [ 233+234+Dog ]:
+    Pteradactyl = Cool:
+    End:
+End

@@ -1,0 +1,20 @@
+
+INT T 645
+INT R 9345
+INT Y 34534
+
+Begin
+    Begin
+        INT U 567
+        Read[T]:
+    End:
+    Begin
+        INT A 345
+        Output[R]:
+        Read[A]:
+        Begin
+            INT A 345
+            Read[A]:
+        End:
+    End:
+End
