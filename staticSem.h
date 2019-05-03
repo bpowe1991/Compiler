@@ -12,6 +12,6 @@ This is the header file for verifying static semantics.
 
 #include "parser.h"
 
-void staticSemVerify(p_node*);
+void generateTarget(p_node*);
 
 #endif 

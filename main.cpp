@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
 
     //Calling testScanner to generate tokens from input.
     root = parser();
-    staticSemVerify(root);
+    generateTarget(root);
     deleteTree(root);
 
     return 0;

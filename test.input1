@@ -13,7 +13,7 @@ Begin
         Output[R]:
         Read[A]:
         Begin
-            INT A 345
+            INT P 345
             Read[A]:
         End:
     End:
