@@ -28,7 +28,9 @@ static void errorHandler(int, p_node*, int);
 
 //Global stack for indentifier variables in parse tree.
 static stack <s_token> variables;
-static int varCount = 0;
+static stack <string> assemblyVars;
+static stack <string> assemblyVarValues;
+static int varCount = 0, accumulator = 0, temporaries = 0;
 
 void staticSemVerify(p_node *root){ 
     //Return when leaf has been reached.    
@@ -47,6 +49,8 @@ void staticSemVerify(p_node *root){
     else if(root->label == "vars" && root->tokens[1] != NULL){
         if((lineNum = verify(variables, root->tokens[1]->tokenInstance)) == -1){
             variables.push(*(root->tokens[1]));
+            assemblyVars.push(root->tokens[1]->tokenInstance);
+            assemblyVarValues.push(root->tokens[2]->tokenInstance);
             varCount++;
         }
         //If variable is already in global stack.
