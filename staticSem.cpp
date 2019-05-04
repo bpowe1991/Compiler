@@ -113,6 +113,20 @@ void generateTarget(p_node *root){
             generateTarget(root->children[0]);
         }
     }
+    else if(root->label == "in"){
+        //Write("READ "+root->tokens[1]->tokenInstance);
+    }
+    else if(root->label == "out"){
+        string tempVar = "T"+to_string(temporaries);
+        temporaries++;
+        generateTarget(root->children[0]); 
+        //Write("STORE "+tempVar);
+        //Write("WRITE "+tempVar);
+    }
+    else if(root->label == "assign"){
+        generateTarget(root->children[0]);
+        //Write("STORE "+root->tokens[0]);
+    }
     else{
         //Traversing child nodes.
         for (x = 0; x < CHILD_SIZE; x++){
@@ -151,6 +165,7 @@ static void verifyStaticSem(p_node *root){
             //Adding local temporary ids and values
             if(inMainBlock){
                 assemblyTempVarValues.push(root->tokens[2]->tokenInstance);
+                temporaries++;
             }
             else{
                 globalVars.push(root->tokens[1]->tokenInstance);
