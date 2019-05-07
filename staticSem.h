@@ -11,8 +11,11 @@ This is the header file for verifying static semantics.
 #define STATIC_SEM
 
 #include <fstream>
+#include <sstream>
 #include "parser.h"
 
-void generateTarget(p_node*, std::ofstream*);
+extern std::stringstream targetFile;
+
+void generateTarget(p_node*);
 
 #endif 

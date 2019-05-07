@@ -1,20 +1,5 @@
-
-INT T 645
-INT R 9345
-INT Y 34534
-
+INT X1 1
 Begin
-    Begin
-        INT U 567
-        Read[T]:
-    End:
-    Begin
-        INT A 345
-        Output[R]:
-        Read[A]:
-        Begin
-            INT B 345
-            Read[B]:
-        End:
-    End:
+  Read [ X1 ] :  
+  Output [ X1 ] : 
 End

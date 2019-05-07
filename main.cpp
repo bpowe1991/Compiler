@@ -35,33 +35,42 @@ int main(int argc, char *argv[]){
         return -1;
     }
     else if (argc == 2){
-        
         //If input file arguement is given.
         input.open(((string)argv[1]+".input1").c_str());
-        output.open(((string)argv[1]+".asm"));
+
+        //Setting cin read buffer to input read buffer.
+        cin.rdbuf(input.rdbuf());
         
         //Checking if file opened.
         if (!input.is_open()){
             
             cout << (string)argv[0]+" : Error! Cannot open file" << endl;
-            error = true;
+            input.close();
+            exit(-1);
         }
-
-        //Setting cin read buffer to input read buffer.
-        cin.rdbuf(input.rdbuf());
     }
     
-    //Exiting if error occurred.
-    if (error){
+    //Calling testScanner to generate tokens from input.
+    root = parser();
+    
+    //Testing semantics and generating code.
+    generateTarget(root);
+    
+    if(argc == 2){
+        output.open(((string)argv[1]+".asm"));
+    }
+    else{
+        output.open("out.asm");
+    }
+    
+    if (!output.is_open()){
+        cout << (string)argv[0]+" : Error! Cannot open file" << endl;
         input.close();
         output.close();
         exit(-1);
     }
 
-    //Calling testScanner to generate tokens from input.
-    root = parser();
-    ofstream *outptr = &output;
-    generateTarget(root, outptr);
+    output << targetFile.str();
     deleteTree(root);
 
     return 0;
