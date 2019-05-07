@@ -10,8 +10,9 @@ This is the header file for verifying static semantics.
 #ifndef STATIC_SEM
 #define STATIC_SEM
 
+#include <fstream>
 #include "parser.h"
 
-void generateTarget(p_node*);
+void generateTarget(p_node*, std::ofstream*);
 
 #endif 

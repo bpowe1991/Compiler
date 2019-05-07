@@ -23,7 +23,7 @@ using namespace std;
 
 int main(int argc, char *argv[]){
     ifstream input;
-    char c;
+    ofstream output;
     string token;
     bool error = false;
     p_node* root;
@@ -38,6 +38,7 @@ int main(int argc, char *argv[]){
         
         //If input file arguement is given.
         input.open(((string)argv[1]+".input1").c_str());
+        output.open(((string)argv[1]+".asm"));
         
         //Checking if file opened.
         if (!input.is_open()){
@@ -53,12 +54,14 @@ int main(int argc, char *argv[]){
     //Exiting if error occurred.
     if (error){
         input.close();
+        output.close();
         exit(-1);
     }
 
     //Calling testScanner to generate tokens from input.
     root = parser();
-    generateTarget(root);
+    ofstream *outptr = &output;
+    generateTarget(root, outptr);
     deleteTree(root);
 
     return 0;
