@@ -2,7 +2,7 @@ CC=g++
 CFLAGS= -g
 OBJS=main.o scanner.o staticSem.o parser.o
 
-statSem: $(OBJS)
+comp: $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 
 main.o: main.cpp token.h scanner.h parser.h
@@ -18,4 +18,4 @@ staticSem.o: staticSem.cpp staticSem.h
 	$(CC) $(CFLAGS) -c staticSem.cpp
 
 clean:
-	-rm -f *.o *.out statSem
+	-rm -f *.o *.out comp

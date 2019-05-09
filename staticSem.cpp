@@ -15,6 +15,7 @@ or exits with error output.
 #include "scanner.h"
 #include "staticSem.h"
 #include <stack>
+#include <string>
 
 using namespace std;
 
@@ -25,7 +26,7 @@ using namespace std;
 
 static void errorHandler(int, p_node*);
 static void verify(p_node*);
-static int find(stack <s_token>, string);
+static int find(stack <s_token>, string, int);
 static void treeTraversal(p_node*);
 static string generateName(string);
 static void exprCode(p_node*);
@@ -40,13 +41,13 @@ static void ifCode(p_node*);
 static void loopCode(p_node*);
 static void ROCode(p_node*, string);
 
-static bool inMainBlock = false;
-
 stringstream targetFile;
+
+static bool inMainBlock = false;
 
 //Global stack for indentifier variables in parse tree.
 static stack <s_token> variables;
-static int varCount = 0, labels = 0, temporaries = 0;
+static int varCount = 0, labels = 0, temporaries = 0, globalCount = 0;
 
 void generateTarget(p_node *root){ 
     //Return when leaf has been reached.    
@@ -83,28 +84,54 @@ void generateTarget(p_node *root){
     }
 }
 
-static int find(stack <s_token> globalStack, string identifier){
+//Function that return the location of a variable on the stacks
+static int find(stack <s_token> globalStack, string identifier, int depth){
     int index = 0;
-    while(!globalStack.empty()){
-        if(globalStack.top().tokenInstance == identifier){
+    if(depth == -1){
+       while(!globalStack.empty()){
+           if(globalStack.top().tokenInstance == identifier){
+               return index;
+           } 
+           index++;
+           globalStack.pop();
+       }
+   }
+   else{
+      for(index = 0; index < depth; index++){
+         if(globalStack.top().tokenInstance == identifier){
             return index;
-        }
-        index++;
-        globalStack.pop();
-    }
+         }
+      }
+      while(globalStack.size() != globalCount){
+         globalStack.pop();
+         index++;
+      }
+      while(!globalStack.empty()){
+          if(globalStack.top().tokenInstance == identifier){
+              return index;
+          }
+          index++;
+          globalStack.pop();
+      }
+
+   }
 
     return -1;
 }
 
+//Function to check static semantics and add variables to stacks
 static void verify(p_node *root){
     int x;
     if(root->label == "vars" && root->tokens[1] != NULL){
-        if(find(variables, root->tokens[1]->tokenInstance) == -1){
+        if(find(variables, root->tokens[1]->tokenInstance, varCount) == -1){
             variables.push(*(root->tokens[1]));
             targetFile << "PUSH" << endl 
                        << "LOAD " << root->tokens[2]->tokenInstance << endl
                        << "STACKW 0" << endl;
             varCount++;
+	    if(inMainBlock == false){
+               globalCount++;
+            }
         }
         else{
             errorHandler(ERROR_CODE1, root);
@@ -114,7 +141,7 @@ static void verify(p_node *root){
         for(x = 0; x < TOKEN_SIZE; x++){
             if(root->tokens[x] != NULL){
                 if(root->tokens[x]->id == "Identifier"){
-                    if(find(variables, root->tokens[x]->tokenInstance) == -1){
+                    if(find(variables, root->tokens[x]->tokenInstance, -1) == -1){
                         errorHandler(ERROR_CODE2, root);
                     }
                 }
@@ -139,6 +166,7 @@ static void errorHandler(int errorCode, p_node *root){
     exit(-1);
 }
 
+//Function for tree traversal
 static void treeTraversal(p_node *root){
     int x;
     if(root->label == "expr"){
@@ -181,17 +209,21 @@ static void treeTraversal(p_node *root){
 //Function to create temporary names and label names
 static string generateName(string type){
     string name;
+    stringstream ss;
     if(type == "T"){
         temporaries++;
-        name = type + to_string(temporaries);
+	ss << temporaries;
+        name = type + ss.str();
     }
     else{
         labels++;
-        name = type + to_string(labels);
+        ss << labels;
+        name = type + ss.str();
     }
     return name;
 }
 
+//Function for expr node code generation
 static void exprCode(p_node *root){
     if(root->tokens[0] != NULL){
         string tempVar = generateName("T");
@@ -210,6 +242,7 @@ static void exprCode(p_node *root){
     }
 }
 
+//Function for A node code generation
 static void ACode(p_node *root){
     if(root->tokens[0] != NULL){
         string tempVar = generateName("T");
@@ -223,6 +256,7 @@ static void ACode(p_node *root){
     }
 }
 
+//Function for N node code generation
 static void NCode(p_node *root){
     if(root->tokens[0] != NULL){
         string tempVar = generateName("T");
@@ -236,6 +270,7 @@ static void NCode(p_node *root){
     }
 }
 
+//Function for M node code generation
 static void MCode(p_node *root){
     if(root->tokens[0] != NULL){
         generateTarget(root->children[0]);
@@ -246,13 +281,14 @@ static void MCode(p_node *root){
     }
 }
 
+//Function for R node code generation
 static void RCode(p_node *root){
     if(root->tokens[0] != NULL){
         if(root->tokens[0]->id == "Integer"){
             targetFile << "LOAD " << root->tokens[0]->tokenInstance << endl;
         }
         else{
-            targetFile << "STACKR " << find(variables, root->tokens[0]->tokenInstance) << endl;
+            targetFile << "STACKR " << find(variables, root->tokens[0]->tokenInstance, -1) << endl;
         }
     }
     else{
@@ -260,14 +296,16 @@ static void RCode(p_node *root){
     }
 }
 
+//Function for in node code generation
 static void inCode(p_node *root){
     string tempVar = generateName("T");
     targetFile  << "READ " << tempVar << endl 
                 << "LOAD " << tempVar << endl
                 << "STACKW " 
-                << find(variables, root->tokens[1]->tokenInstance) << endl;
+                << find(variables, root->tokens[1]->tokenInstance, -1) << endl;
 }
 
+//Function for out node code generation
 static void outCode(p_node *root){
         string tempVar = generateName("T");
         generateTarget(root->children[0]); 
@@ -275,12 +313,14 @@ static void outCode(p_node *root){
                    << "WRITE " << tempVar << endl;
 }
 
+//Function for assign node code generation
 static void assignCode(p_node *root){
     generateTarget(root->children[0]);
     targetFile << "STACKW " 
-               << find(variables, root->tokens[0]->tokenInstance) << endl;
+               << find(variables, root->tokens[0]->tokenInstance, -1) << endl;
 }
 
+//Function for if node code generation
 static void ifCode(p_node *root){
     generateTarget(root->children[2]);
     string tempVar = generateName("T");
@@ -293,13 +333,14 @@ static void ifCode(p_node *root){
     targetFile << label << ": NOOP" << endl;
 }
 
+//Function for loop node code generation
 static void loopCode(p_node *root){
     string label1 = generateName("L");
     generateTarget(root->children[2]);
     string tempVar = generateName("T");
-    targetFile << label1 << ": "<< "STORE " << tempVar << endl;
+    targetFile << "STORE " << tempVar << endl;
     generateTarget(root->children[0]);
-    targetFile << "SUB " << tempVar << endl;
+    targetFile << label1 << ": SUB " << tempVar << endl;
     string label2 = generateName("L");
     ROCode(root->children[1], label2);
     generateTarget(root->children[3]);
@@ -307,6 +348,7 @@ static void loopCode(p_node *root){
                << label2 << ": NOOP" << endl;
 }
 
+//Function for RO node code generation
 static void ROCode(p_node *root, string label){
     if(root->tokens[0]->tokenInstance == "<"){
         targetFile << "BRZPOS " << label << endl;

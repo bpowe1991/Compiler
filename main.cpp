@@ -42,11 +42,10 @@ int main(int argc, char *argv[]){
         cin.rdbuf(input.rdbuf());
         
         //Checking if file opened.
-        if (!input.is_open()){
-            
-            cout << (string)argv[0]+" : Error! Cannot open file" << endl;
-            input.close();
-            exit(-1);
+        if(!input.is_open()){ 
+           cout << (string)argv[0]+" : Error! Cannot open file" << endl;
+           input.close();
+           exit(-1);
         }
     }
     
@@ -57,21 +56,27 @@ int main(int argc, char *argv[]){
     generateTarget(root);
     
     if(argc == 2){
-        output.open(((string)argv[1]+".asm"));
+        output.open(((string)argv[1]+".asm").c_str());
     }
     else{
         output.open("out.asm");
     }
     
-    if (!output.is_open()){
-        cout << (string)argv[0]+" : Error! Cannot open file" << endl;
-        input.close();
-        output.close();
-        exit(-1);
+    if(!output.is_open()){
+       cout << (string)argv[0]+" : Error! Cannot open file" << endl;
+       input.close();
+       output.close();
+       exit(-1);
     }
 
     output << targetFile.str();
     deleteTree(root);
-
+    
+    if(argc == 2){
+       cout << (string)argv[1]+".asm" << endl;
+    }
+    else{
+       cout << "out.asm" << endl;
+    }
     return 0;
 }

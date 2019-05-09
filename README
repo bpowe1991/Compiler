@@ -1,6 +1,10 @@
+Storage=Local
+All local test programs work
+
 Briton Powe
 cs4280
-P2
+P4
 
-This program parses tokens generated from scanner.cpp and returns a parse tree from parser.cpp.
+This program compiles files with the extension .input1 and generates a target with the same name with extension .asm.
+Invocation: ./comp <filesname>.input1   *(which creates)->   <filename>.asm
 
