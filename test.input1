@@ -1,11 +1,7 @@
-INT X1 1 
+INT X1 1
 INT X2 2
+INT X1 3 \ var X1 redefined
 Begin
-  INT X3 3
-  Read [ X1 ] :  
-  Begin
-     INT X4 4
-     Read [ X4 ] :
-  End :
-  Output [ X4 ] :  \ var X4 undefined
+  Output [ 1 ] :
 End
+
